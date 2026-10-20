@@ -1,1 +1,6 @@
-
+{
+  "name": "Click Rush",
+  "description": "Um minigame de reflexos: clique no alvo o máximo de vezes que conseguir em 20 segundos!",
+  "image": "https://placehold.co/600x400/111827/ffffff?text=Click+Rush",
+  "category": "Arcade"
+}
