@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Click Rush</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: #111827;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 { color: #38bdf8; margin: 0; }
+    .stats { display: flex; gap: 24px; font-size: 18px; }
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 14px 22px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #start { background: #38bdf8; color: #082f49; }
+    #target {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: #f43f5e;
+      color: white;
+      font-size: 28px;
+      display: none;
+      touch-action: manipulation;
+    }
+    #message { color: #cbd5e1; }
+  </style>
+</head>
+<body>
+  <h1>Click Rush</h1>
+  <p>Clique no alvo o máximo que conseguir em 20 segundos!</p>
+
+  <div class="stats">
+    <div>Pontos: <strong id="score">0</strong></div>
+    <div>Tempo: <strong id="time">20</strong>s</div>
+  </div>
+
+  <button id="start">Começar jogo</button>
+  <button id="target" aria-label="Alvo">+</button>
+  <p id="message">Prepare seus reflexos!</p>
+
+  <script>
+    const start = document.getElementById("start");
+    const target = document.getElementById("target");
+    const scoreText = document.getElementById("score");
+    const timeText = document.getElementById("time");
+    const message = document.getElementById("message");
+
+    let score = 0;
+    let time = 20;
+    let timer = null;
+
+    start.addEventListener("click", () => {
+      clearInterval(timer);
+      score = 0;
+      time = 20;
+      scoreText.textContent = score;
+      timeText.textContent = time;
+      message.textContent = "Clique rápido!";
+      start.style.display = "none";
+      target.style.display = "block";
+
+      timer = setInterval(() => {
+        time--;
+        timeText.textContent = time;
+
+        if (time <= 0) {
+          clearInterval(timer);
+          target.style.display = "none";
+          start.style.display = "inline-block";
+          start.textContent = "Jogar novamente";
+          message.textContent = "Fim de jogo! Sua pontuação: " + score;
+          const best = Math.max(
+            score,
+            Number(localStorage.getItem("clickRushBest") || 0)
+          );
+          localStorage.setItem("clickRushBest", best);
+          message.textContent += " | Recorde: " + best;
+        }
+      }, 1000);
+    });
+
+    target.addEventListener("click", () => {
+      if (time > 0) {
+        score++;
+        scoreText.textContent = score;
+        target.style.transform =
+          "translate(" + (Math.random() * 100 - 50) + "px," +
+          (Math.random() * 60 - 30) + "px)";
+      }
+    });
+  </script>
+</body>
+</html>
