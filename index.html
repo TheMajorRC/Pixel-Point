@@ -1,112 +1,14 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Click Rush</title>
-<style>
-:root{font-family:system-ui,sans-serif;color:#f7f5ff;background:#111019}
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:grid;place-items:center;padding:18px;background:radial-gradient(ellipse at top,#30254b,#111019 65%)}
-.game{width:min(700px,100%);text-align:center}
-.kicker{font:11px monospace;letter-spacing:3px;color:#c1aaff}
-h1{font-size:clamp(34px,7vw,56px);letter-spacing:-2px;margin:12px 0 7px}
-h1 span{color:#d4ff63}
-.subtitle{color:#aaa5bc;font-size:14px;margin:0 auto 24px;max-width:450px;line-height:1.6}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
-.stat{background:#201d2d;border:1px solid #40364f;padding:12px 8px}
-.stat small{display:block;color:#9c95b0;font:10px monospace;letter-spacing:1px;margin-bottom:5px}
-.stat strong{font-size:25px;color:#d4ff63}
-.arena{height:min(48vh,330px);min-height:230px;border:1px solid #4c4260;background:#171521;position:relative;overflow:hidden;border-radius:5px}
-.arena:before{content:"";position:absolute;inset:0;background-image:linear-gradient(#b49aff0c 1px,transparent 1px),linear-gradient(90deg,#b49aff0c 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
-.target{position:absolute;width:48px;height:48px;border:0;border-radius:50%;background:#d4ff63;color:#181a11;font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 0 0 7px #d4ff6320,0 0 24px #d4ff6350;display:none;transform:translate(-50%,-50%);touch-action:manipulation}
-.target:active{transform:translate(-50%,-50%) scale(.85)}
-.message{position:absolute;inset:0;display:grid;place-content:center;gap:12px;padding:20px;pointer-events:none}
-.message strong{font-size:22px}.message span{font-size:13px;color:#aaa5bc;line-height:1.5}
-button.action{border:0;background:#b49aff;color:#171321;padding:13px 22px;font:700 11px monospace;letter-spacing:1px;cursor:pointer;pointer-events:auto}
-button.action:hover{background:#c6b3ff}
-.note{font-size:11px;color:#7f798f;margin-top:13px}
-@media(max-width:420px){.stats{gap:5px}.stat{padding:10px 4px}.stat strong{font-size:21px}.arena{min-height:240px}.target{width:44px;height:44px}}
-</style>
-</head>
-<body>
-<main class="game">
-  <div class="kicker">MINI GAME / 001</div>
-  <h1>CLICK <span>RUSH</span></h1>
-  <p class="subtitle">Mire rápido, clique nos alvos e faça o máximo de pontos em 20 segundos.</p>
-  <section class="stats" aria-label="Placar">
-    <div class="stat"><small>PONTOS</small><strong id="score">0</strong></div>
-    <div class="stat"><small>TEMPO</small><strong id="time">20</strong></div>
-    <div class="stat"><small>RECORDE</small><strong id="best">0</strong></div>
-  </section>
-  <section class="arena" id="arena" aria-label="Área do jogo">
-    <button class="target" id="target" aria-label="Clique no alvo">✦</button>
-    <div class="message" id="message">
-      <strong>Preparado?</strong>
-      <span>O alvo aparece em posições diferentes.<br>Cada acerto vale 1 ponto.</span>
-      <button class="action" id="start">COMEÇAR PARTIDA</button>
-    </div>
-  </section>
-  <p class="note">DICA: precisão e velocidade fazem a diferença.</p>
-</main>
-<script>
-(() => {
-  const arena = document.querySelector("#arena");
-  const target = document.querySelector("#target");
-  const message = document.querySelector("#message");
-  const scoreEl = document.querySelector("#score");
-  const timeEl = document.querySelector("#time");
-  const bestEl = document.querySelector("#best");
-  const startBtn = document.querySelector("#start");
-  let score = 0, time = 20, running = false, timer = null;
-  let best = 0;
-  try { best = Number(localStorage.getItem("clickRushBest") || 0); } catch {}
-  bestEl.textContent = best;
-
-  function moveTarget() {
-    const pad = 32;
-    const x = pad + Math.random() * Math.max(1, arena.clientWidth - pad * 2);
-    const y = pad + Math.random() * Math.max(1, arena.clientHeight - pad * 2);
-    target.style.left = x + "px";
-    target.style.top = y + "px";
-  }
-  function finish() {
-    running = false;
-    clearInterval(timer);
-    target.style.display = "none";
-    message.style.display = "grid";
-    const newRecord = score > best;
-    if (newRecord) {
-      best = score;
-      bestEl.textContent = best;
-      try { localStorage.setItem("clickRushBest", String(best)); } catch {}
-    }
-    message.innerHTML = `<strong>${newRecord ? "NOVO RECORDE!" : "FIM DE JOGO!"}</strong><span>Você fez <b>${score}</b> ponto(s). ${score >= 15 ? "Mandou muito bem!" : "Tente superar sua pontuação."}</span><button class="action" id="restart">JOGAR NOVAMENTE</button>`;
-    document.querySelector("#restart").addEventListener("click", start);
-  }
-  function start() {
-    score = 0; time = 20; running = true;
-    scoreEl.textContent = score;
-    timeEl.textContent = time;
-    message.style.display = "none";
-    target.style.display = "block";
-    moveTarget();
-    clearInterval(timer);
-    timer = setInterval(() => {
-      time--;
-      timeEl.textContent = time;
-      if (time <= 0) finish();
-    }, 1000);
-  }
-  target.addEventListener("click", () => {
-    if (!running) return;
-    score++;
-    scoreEl.textContent = score;
-    moveTarget();
-  });
-  startBtn.addEventListener("click", start);
-  window.addEventListener("resize", () => { if (running) moveTarget(); });
-})();
-</script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101018" />
+    <meta name="description" content="Uma coleção de jogos rápidos para jogar direto no navegador." />
+    <title>Pixel Portal — Jogos grátis</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>
